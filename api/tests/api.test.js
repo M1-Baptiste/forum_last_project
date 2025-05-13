@@ -7,7 +7,7 @@ const expect = chai.expect;
 
 chai.use(chaiHttp);
 
-let app, server;
+let app;
 let mongoServer;
 
 before(async function() {
@@ -23,16 +23,19 @@ before(async function() {
   }
   
   // Se connecter à la BD en mémoire
+  await mongoose.connect(mongoUri);
+  console.log('Connecté à la base de données mémoire pour les tests');
+  
+  // Définir l'environnement de test
   process.env.NODE_ENV = 'test';
   process.env.DATABASE_URL = mongoUri;
   
   // Import après avoir configuré l'environnement
-  const { app: expressApp } = require('../server');
-  app = expressApp;
+  const serverModule = require('../server');
+  app = serverModule.app;
 });
 
 after(async () => {
-  if (server) server.close();
   await mongoose.disconnect();
   await mongoServer.stop();
 });
@@ -40,11 +43,10 @@ after(async () => {
 describe('API Forum', () => {
   beforeEach(async () => {
     // Vider la base de données avant chaque test
-    if (mongoose.connection.readyState !== 0) {
-      const collections = await mongoose.connection.db.collections();
-      for (const collection of collections) {
-        await collection.deleteMany({});
-      }
+    const collections = mongoose.connection.collections;
+    for (const key in collections) {
+      const collection = collections[key];
+      await collection.deleteMany({});
     }
   });
 

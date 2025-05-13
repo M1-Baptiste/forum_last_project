@@ -11,13 +11,20 @@ const DATABASE_URL = process.env.DATABASE_URL || 'mongodb://localhost:27017/foru
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
+
+// Utiliser morgan seulement en dehors des tests
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
 
 // Connexion à la base de données
 const connectDB = async () => {
   try {
-    await mongoose.connect(DATABASE_URL);
-    console.log('Connexion à MongoDB réussie');
+    // Si nous sommes en test, ne pas se connecter à MongoDB car les tests le feront
+    if (process.env.NODE_ENV !== 'test' && mongoose.connection.readyState === 0) {
+      await mongoose.connect(DATABASE_URL);
+      console.log('Connexion à MongoDB réussie');
+    }
   } catch (err) {
     console.error('Erreur de connexion à MongoDB:', err);
   }
@@ -40,7 +47,8 @@ const messageSchema = new mongoose.Schema({
   }
 });
 
-const Message = mongoose.model('Message', messageSchema);
+// Vérifiez si le modèle existe déjà avant de le créer
+const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
 
 // Routes
 app.get('/api/messages', async (req, res) => {
@@ -77,7 +85,7 @@ if (require.main === module) {
     console.log(`API du forum en écoute sur le port ${PORT}`);
   });
 } else {
-  // Si importé comme module (pour les tests), juste se connecter à la BD
+  // Si importé comme module (pour les tests), juste initialiser la connexion
   connectDB();
 }
 
