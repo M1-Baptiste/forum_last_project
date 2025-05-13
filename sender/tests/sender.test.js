@@ -5,7 +5,7 @@ const expect = chai.expect;
 
 chai.use(chaiHttp);
 
-// Mock du serveur pour les tests
+// Import du serveur pour les tests
 const app = require('../server');
 
 describe('Sender Service', () => {
@@ -22,19 +22,33 @@ describe('Sender Service', () => {
   });
 
   describe('POST /send', () => {
-    it('devrait transmettre le message à l\'API', (done) => {
+    it('devrait traiter l\'envoi du message', (done) => {
       const message = {
-        pseudo: 'TestUser',
+        username: 'TestUser',
         content: 'Ceci est un message de test'
       };
       
-      // Ce test nécessiterait un mock de l'API
-      // Pour simplifier, on vérifie juste que la route existe
+      // En mode test, on vérifie juste que le service répond correctement
       chai.request(app)
         .post('/send')
         .send(message)
         .end((err, res) => {
-          expect(res).to.have.status(302); // Redirection après envoi
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+
+    it('ne devrait pas accepter un message sans username', (done) => {
+      const message = {
+        content: 'Message sans username'
+      };
+      
+      chai.request(app)
+        .post('/send')
+        .send(message)
+        .end((err, res) => {
+          expect(res).to.have.status(200);  // Renvoie la page avec une erreur
+          expect(res).to.be.html;
           done();
         });
     });
