@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forum Anonyme - Messages</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Forum Anonyme</h1>
+      <a href="http://localhost:8080" class="button">Écrire un message</a>
+    </header>
+
+    <main>
+      <section class="messages">
+        <h2>Messages récents</h2>
+        
+        <% if (locals.error) { %>
+          <div class="error-message">
+            <%= error %>
+          </div>
+        <% } %>
+        
+        <% if (messages && messages.length > 0) { %>
+          <div class="message-list">
+            <% messages.forEach(message => { %>
+              <div class="message-card">
+                <div class="message-header">
+                  <span class="username"><%= message.username %></span>
+                  <span class="date"><%= new Date(message.createdAt).toLocaleString() %></span>
+                </div>
+                <div class="message-content">
+                  <%= message.content %>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="no-messages">Aucun message pour le moment.</p>
+        <% } %>
+      </section>
+    </main>
+    
+    <footer>
+      <p>&copy; 2023 Forum Anonyme</p>
+    </footer>
+  </div>
+
+  <script>
+    // Rafraîchir la page toutes les 30 secondes
+    setTimeout(() => {
+      window.location.reload();
+    }, 30000);
+  </script>
+</body>
+</html> 
