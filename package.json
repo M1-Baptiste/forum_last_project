@@ -8,17 +8,27 @@
     "build": "docker-compose build",
     "commit": "git-cz",
     "lint": "eslint .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test:api && npm run test:thread && npm run test:sender",
+    "test:api": "cd api && mocha tests/**/*.test.js",
+    "test:thread": "cd thread && mocha tests/**/*.test.js",
+    "test:sender": "cd sender && mocha tests/**/*.test.js",
+    "release": "standard-version",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
+    "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
     "commitizen": "^4.3.0",
+    "conventional-changelog-cli": "^2.2.2",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.33.0",
-    "husky": "^8.0.3"
+    "husky": "^8.0.3",
+    "mocha": "^10.2.0",
+    "standard-version": "^9.5.0"
   },
   "config": {
     "commitizen": {
@@ -27,7 +37,13 @@
   },
   "husky": {
     "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-push": "npm test"
+    }
+  },
+  "standard-version": {
+    "scripts": {
+      "postchangelog": "git add CHANGELOG.md"
     }
   }
 } 

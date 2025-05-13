@@ -38,8 +38,8 @@ npm start
 
 ## Utilisation
 
-- Accéder à l'interface d'affichage des messages : http://localhost
-- Accéder à l'interface d'envoi des messages : http://localhost:8080
+- Accéder à l'interface d'affichage des messages : http://localhost:81
+- Accéder à l'interface d'envoi des messages : http://localhost:8090
 
 ## Développement
 
@@ -48,12 +48,54 @@ Ce projet utilise Conventional Commits pour la gestion des versions :
 ```bash
 # Pour faire un commit suivant la convention
 npm run commit
+
+# Pour exécuter les tests
+npm test
+
+# Pour générer un changelog
+npm run changelog
+
+# Pour créer une nouvelle version
+npm run release
 ```
 
 ## CI/CD
 
 Une pipeline CI/CD est configurée pour :
 1. Valider le code (linting)
-2. Exécuter les tests
+2. Exécuter les tests automatisés
 3. Construire les images Docker
-4. Déployer les images sur le registry GitHub/GitLab 
+4. Déployer les images sur le registry GitHub
+5. Mettre à jour automatiquement le changelog
+
+## Gestion de versions et Changelog
+
+Le projet utilise :
+- **Commitizen** : Pour faciliter l'utilisation de la convention Conventional Commits
+- **Commitlint** : Pour valider que les messages de commit suivent la convention
+- **Standard-version** : Pour automatiser la gestion des versions
+- **Conventional-changelog** : Pour générer automatiquement le changelog
+
+Ces outils permettent une gestion automatisée des versions et facilitent la génération des changelogs.
+
+## Structure du projet
+
+```
+forum-anonyme/
+├── api/               # Service API
+│   ├── server.js      # Serveur Express
+│   ├── Dockerfile     # Configuration Docker
+│   └── tests/         # Tests automatisés
+├── db/                # Configuration de la base de données
+├── thread/            # Service d'affichage
+│   ├── server.js      # Serveur Express
+│   ├── Dockerfile     # Configuration Docker
+│   └── tests/         # Tests automatisés
+├── sender/            # Service d'envoi
+│   ├── server.js      # Serveur Express
+│   ├── Dockerfile     # Configuration Docker
+│   └── tests/         # Tests automatisés
+├── docker-compose.yml # Configuration Docker Compose
+├── .github/workflows/ # Pipelines CI/CD
+└── CHANGELOG.md       # Historique des changements
+``` 
