@@ -40,8 +40,10 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm install
+      - name: Install service dependencies
+        run: cd ${{ matrix.service }} && npm install
       - name: Run tests for ${{ matrix.service }}
         run: npm run test:${{ matrix.service }}
 
