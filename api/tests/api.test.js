@@ -23,15 +23,12 @@ before(async function() {
   }
   
   // Se connecter à la BD en mémoire
-  await mongoose.connect(mongoUri);
-  
-  // Charger le app sans démarrer le serveur
   process.env.NODE_ENV = 'test';
   process.env.DATABASE_URL = mongoUri;
   
   // Import après avoir configuré l'environnement
-  const appModule = require('../server');
-  app = appModule.app;  // Supposons que server.js exporte { app }
+  const { app: expressApp } = require('../server');
+  app = expressApp;
 });
 
 after(async () => {
