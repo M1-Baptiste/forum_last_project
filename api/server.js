@@ -14,12 +14,14 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Connexion à la base de données
-mongoose.connect(DATABASE_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => console.log('Connexion à MongoDB réussie'))
-  .catch(err => console.error('Erreur de connexion à MongoDB:', err));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(DATABASE_URL);
+    console.log('Connexion à MongoDB réussie');
+  } catch (err) {
+    console.error('Erreur de connexion à MongoDB:', err);
+  }
+};
 
 // Modèle de données
 const messageSchema = new mongoose.Schema({
@@ -67,7 +69,16 @@ app.post('/api/messages', async (req, res) => {
   }
 });
 
-// Démarrage du serveur
-app.listen(PORT, () => {
-  console.log(`API du forum en écoute sur le port ${PORT}`);
-}); 
+// Démarrage du serveur seulement si ce fichier est exécuté directement (pas importé comme module)
+let server;
+if (require.main === module) {
+  connectDB();
+  server = app.listen(PORT, () => {
+    console.log(`API du forum en écoute sur le port ${PORT}`);
+  });
+} else {
+  // Si importé comme module (pour les tests), juste se connecter à la BD
+  connectDB();
+}
+
+module.exports = { app, server }; 
