@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Service 1: API - Gestion des messages du forum
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: forum-api
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - backend
+    environment:
+      - DATABASE_URL=mongodb://db:27017/forum
+    volumes:
+      - api-data:/app/data
+
+  # Service 2: Base de données MongoDB
+  db:
+    image: mongo:latest
+    container_name: forum-db
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - db-data:/data/db
+
+  # Service 3: Thread - Affichage des messages (port 80)
+  thread:
+    build:
+      context: ./thread
+      dockerfile: Dockerfile
+    container_name: forum-thread
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - backend
+      - frontend
+
+  # Service 4: Sender - Écriture des messages (port 8080)
+  sender:
+    build:
+      context: ./sender
+      dockerfile: Dockerfile
+    container_name: forum-sender
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+    networks:
+      - backend
+      - frontend
+
+networks:
+  backend:
+    internal: true  # Réseau interne, isolé d'Internet
+  frontend:
+    driver: bridge  # Réseau pour l'accès externe
+
+volumes:
+  db-data:
+  api-data: 
