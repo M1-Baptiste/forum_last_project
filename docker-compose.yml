@@ -35,14 +35,14 @@ services:
     container_name: forum-thread
     restart: always
     ports:
-      - "80:80"
+      - "81:80"
     depends_on:
       - api
     networks:
       - backend
       - frontend
 
-  # Service 4: Sender - Écriture des messages (port 8080)
+  # Service 4: Sender - Écriture des messages (port 8090)
   sender:
     build:
       context: ./sender
@@ -50,7 +50,7 @@ services:
     container_name: forum-sender
     restart: always
     ports:
-      - "8080:8080"
+      - "8090:8080"  # Changement du port hôte de 8080 à 8090
     depends_on:
       - api
     networks:
@@ -65,4 +65,4 @@ networks:
 
 volumes:
   db-data:
-  api-data: 
+  api-data:
