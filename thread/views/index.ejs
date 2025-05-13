@@ -29,7 +29,13 @@
               <div class="message-card">
                 <div class="message-header">
                   <span class="username"><%= message.username %></span>
-                  <span class="date"><%= new Date(message.createdAt).toLocaleString() %></span>
+                  <span class="date"><%= new Date(message.createdAt).toLocaleString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) %></span>
                 </div>
                 <div class="message-content">
                   <%= message.content %>
@@ -44,7 +50,7 @@
     </main>
     
     <footer>
-      <p>&copy; 2023 Forum Anonyme</p>
+      <p>&copy; 2025 Forum Anonyme</p>
     </footer>
   </div>
 
