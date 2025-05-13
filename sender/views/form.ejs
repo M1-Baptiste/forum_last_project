@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forum Anonyme - Envoyer un message</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Forum Anonyme</h1>
+      <a href="http://localhost" class="button">Voir les messages</a>
+    </header>
+
+    <main>
+      <section class="form-section">
+        <h2>Envoyer un message</h2>
+        
+        <% if (success) { %>
+          <div class="success-message">
+            <%= success %>
+          </div>
+        <% } %>
+        
+        <% if (error) { %>
+          <div class="error-message">
+            <%= error %>
+          </div>
+        <% } %>
+        
+        <form action="/send" method="POST" class="message-form">
+          <div class="form-group">
+            <label for="username">Pseudonyme :</label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              value="<%= username %>"
+              placeholder="Entrez votre pseudonyme" 
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="content">Message :</label>
+            <textarea 
+              id="content" 
+              name="content" 
+              placeholder="Écrivez votre message ici" 
+              rows="6" 
+              required
+            ><%= content %></textarea>
+          </div>
+          
+          <button type="submit" class="submit-button">Envoyer</button>
+        </form>
+      </section>
+    </main>
+    
+    <footer>
+      <p>&copy; 2023 Forum Anonyme</p>
+    </footer>
+  </div>
+</body>
+</html> 
