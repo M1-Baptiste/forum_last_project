@@ -9,10 +9,11 @@
     "test": "mocha tests/**/*.test.js"
   },
   "dependencies": {
+    "body-parser": "^1.20.1",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "mongoose": "^7.0.0",
-    "cors": "^2.8.5",
-    "body-parser": "^1.20.1"
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "chai": "^4.3.7",
@@ -20,4 +21,4 @@
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20"
   }
-} 
+}
