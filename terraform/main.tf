@@ -3,6 +3,22 @@ provider "aws" {
   region = var.aws_region
 }
 
+resource "tls_private_key" "key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "deployer-key"
+  public_key = tls_private_key.key.public_key_openssh
+}
+
+resource "local_file" "private_key" {
+  content         = tls_private_key.key.private_key_pem
+  filename        = "${path.module}/deployer-key.pem"
+  file_permission = "0600"
+}
+
 # Création d'un groupe de sécurité pour autoriser le trafic entrant
 resource "aws_security_group" "forum_sg" {
   name_prefix = "forum-security-group-baptiste"
@@ -66,6 +82,8 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "forum_api" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
+  security_groups = [aws_security_group.forum_sg.name]
+  key_name        = aws_key_pair.deployer.key_name
 
   user_data = <<-EOT
     #!/bin/bash
@@ -89,6 +107,9 @@ resource "aws_instance" "forum_api" {
 resource "aws_instance" "forum_db" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
+  security_groups = [aws_security_group.forum_sg.name]
+  key_name        = aws_key_pair.deployer.key_name
+
 
   user_data = <<-EOT
     #!/bin/bash
@@ -106,6 +127,9 @@ resource "aws_instance" "forum_db" {
 resource "aws_instance" "forum_thread" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
+  security_groups = [aws_security_group.forum_sg.name]
+  key_name        = aws_key_pair.deployer.key_name
+
 
   user_data = <<-EOT
     #!/bin/bash
@@ -129,6 +153,8 @@ resource "aws_instance" "forum_thread" {
 resource "aws_instance" "forum_sender" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
+  security_groups = [aws_security_group.forum_sg.name]
+  key_name        = aws_key_pair.deployer.key_name
 
   user_data = <<-EOT
     #!/bin/bash
