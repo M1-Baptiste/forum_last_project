@@ -10,7 +10,7 @@ variable "instance_type" {
 
 variable "aws_key_pair" {
   type    = string
-  default = "my-forum-key"
+  default = "baptiste_key"
 }
 
 variable "github_repository" {

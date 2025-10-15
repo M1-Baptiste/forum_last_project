@@ -3,26 +3,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Crée une nouvelle clé SSH privée avec l'algorithme RSA
-resource "tls_private_key" "key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-# Crée une ressource AWS Key Pair en utilisant la clé publique de la ressource tls_private_key
-resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
-  public_key = tls_private_key.key.public_key_openssh
-}
-
-# Crée un fichier local pour stocker la clé privée
-resource "local_file" "private_key" {
-  content         = tls_private_key.key.private_key_pem
-  filename        = "${path.module}/deployer-key.pem"
-  file_permission = "0600"
-}
-
-# Création d'un groupe de sécurité pour autoriser le trafic entrant
+# Crée un groupe de sécurité pour autoriser le trafic entrant
 resource "aws_security_group" "forum_sg" {
   name_prefix = "forum-security-group-baptiste"
   description = "Allow inbound traffic for the forum services"
@@ -67,7 +48,7 @@ resource "aws_security_group" "forum_sg" {
   }
 }
 
-# Récupération de l'AMI (Amazon Machine Image) la plus récente pour Ubuntu
+# Récupère l'AMI la plus récente pour Ubuntu
 data "aws_ami" "ubuntu" {
   most_recent = true
   filter {
@@ -81,12 +62,12 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-# Création de l'instance EC2 pour l'API
+# Crée l'instance EC2 pour l'API
 resource "aws_instance" "forum_api" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name      = aws_key_pair.deployer.key_name
+  key_name      = var.aws_key_pair
 
   user_data = <<-EOT
     #!/bin/bash
@@ -106,12 +87,12 @@ resource "aws_instance" "forum_api" {
   }
 }
 
-# Création de l'instance EC2 pour la base de données
+# Crée l'instance EC2 pour la base de données
 resource "aws_instance" "forum_db" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name      = aws_key_pair.deployer.key_name
+  key_name      = var.aws_key_pair
 
   user_data = <<-EOT
     #!/bin/bash
@@ -125,12 +106,12 @@ resource "aws_instance" "forum_db" {
   }
 }
 
-# Création de l'instance EC2 pour le service Thread
+# Crée l'instance EC2 pour le service Thread
 resource "aws_instance" "forum_thread" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name      = aws_key_pair.deployer.key_name
+  key_name      = var.aws_key_pair
 
   user_data = <<-EOT
     #!/bin/bash
@@ -150,12 +131,12 @@ resource "aws_instance" "forum_thread" {
   }
 }
 
-# Création de l'instance EC2 pour le service Sender
+# Crée l'instance EC2 pour le service Sender
 resource "aws_instance" "forum_sender" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name      = aws_key_pair.deployer.key_name
+  key_name      = var.aws_key_pair
 
   user_data = <<-EOT
     #!/bin/bash

@@ -15,5 +15,5 @@ output "sender_public_ip" {
 }
 
 output "ssh_command" {
-  value = "ssh -i my-forum-key.pem ubuntu@${aws_instance.forum_api.public_ip}"
+  value = "ssh -i ${var.aws_key_pair}.pem ubuntu@${aws_instance.forum_api.public_ip}"
 }
