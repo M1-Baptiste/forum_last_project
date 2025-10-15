@@ -16,14 +16,7 @@ resource "aws_security_group" "forum_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Règle pour les ports des services
-  ingress {
-    from_port   = 8080
-    to_port     = 8090
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
+  # Règle pour les ports des services (API, Thread, Sender)
   ingress {
     from_port   = 80
     to_port     = 81
@@ -31,7 +24,14 @@ resource "aws_security_group" "forum_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Règle pour la communication inter-instances
+  ingress {
+    from_port   = 8080
+    to_port     = 8090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Règle pour la communication inter-conteneurs (via self=true) et inter-instances si nécessaire
   ingress {
     from_port = 0
     to_port   = 65535
@@ -62,8 +62,8 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-# Crée l'instance EC2 pour l'API
-resource "aws_instance" "forum_api" {
+# Crée une seule instance EC2 pour tous les services
+resource "aws_instance" "forum_all_services" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
@@ -72,86 +72,47 @@ resource "aws_instance" "forum_api" {
   user_data = <<-EOT
     #!/bin/bash
     sudo apt-get update -y
-    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update -y
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
+    sudo apt-get install -y docker.io docker-compose
     sudo usermod -aG docker ubuntu
-    docker pull ghcr.io/${var.github_repository}/api:${var.app_version}
-    docker run -d --name forum-api -p 8080:3000 ghcr.io/${var.github_repository}/api:${var.app_version}
+
+    # Création du fichier docker-compose.yml
+    cat <<'EOF' > /home/ubuntu/docker-compose.yml
+version: '3.8'
+services:
+  api:
+    image: ghcr.io/${var.github_repository}/api:${var.app_version}
+    container_name: forum-api
+    ports:
+      - "8080:3000"
+    restart: always
+
+  db:
+    image: mongo:latest
+    container_name: forum-db
+    restart: always
+    # Laisser la base de données interne au réseau Docker pour des raisons de sécurité
+    # Si d'autres services ont besoin d'y accéder, ils peuvent le faire via le nom de service 'db'
+
+  thread:
+    image: ghcr.io/${var.github_repository}/thread:${var.app_version}
+    container_name: forum-thread
+    ports:
+      - "81:80"
+    restart: always
+
+  sender:
+    image: ghcr.io/${var.github_repository}/sender:${var.app_version}
+    container_name: forum-sender
+    ports:
+      - "8090:8080"
+    restart: always
+EOF
+
+    # Exécution des services avec Docker Compose
+    sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
   EOT
 
   tags = {
-    Name = "forum-api-instance-baptiste"
-  }
-}
-
-# Crée l'instance EC2 pour la base de données
-resource "aws_instance" "forum_db" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  security_groups = [aws_security_group.forum_sg.name]
-  key_name      = var.aws_key_pair
-
-  user_data = <<-EOT
-    #!/bin/bash
-    sudo apt-get update -y
-    sudo apt-get install -y docker.io
-    sudo docker run -d --name forum-db mongo:latest
-  EOT
-
-  tags = {
-    Name = "forum-db-instance-baptiste"
-  }
-}
-
-# Crée l'instance EC2 pour le service Thread
-resource "aws_instance" "forum_thread" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  security_groups = [aws_security_group.forum_sg.name]
-  key_name      = var.aws_key_pair
-
-  user_data = <<-EOT
-    #!/bin/bash
-    sudo apt-get update -y
-    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update -y
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
-    sudo usermod -aG docker ubuntu
-    docker pull ghcr.io/${var.github_repository}/thread:${var.app_version}
-    docker run -d --name forum-thread -p 81:80 ghcr.io/${var.github_repository}/thread:${var.app_version}
-  EOT
-
-  tags = {
-    Name = "forum-thread-instance-baptiste"
-  }
-}
-
-# Crée l'instance EC2 pour le service Sender
-resource "aws_instance" "forum_sender" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  security_groups = [aws_security_group.forum_sg.name]
-  key_name      = var.aws_key_pair
-
-  user_data = <<-EOT
-    #!/bin/bash
-    sudo apt-get update -y
-    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update -y
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
-    sudo usermod -aG docker ubuntu
-    docker pull ghcr.io/${var.github_repository}/sender:${var.app_version}
-    docker run -d --name forum-sender -p 8090:8080 ghcr.io/${var.github_repository}/sender:${var.app_version}
-  EOT
-
-  tags = {
-    Name = "forum-sender-instance-baptiste"
+    Name = "forum-services-instance-baptiste"
   }
 }
