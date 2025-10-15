@@ -1,11 +1,15 @@
-output "public_ip" {
-  value = aws_instance.forum_app.public_ip
+output "api_public_ip" {
+  value = aws_instance.forum_api.public_ip
 }
 
-output "sender_url" {
-  value = "http://${aws_instance.forum_app.public_ip}:8090"
+output "db_public_ip" {
+  value = aws_instance.forum_db.public_ip
 }
 
-output "thread_url" {
-  value = "http://${aws_instance.forum_app.public_ip}:81"
+output "thread_public_ip" {
+  value = aws_instance.forum_thread.public_ip
+}
+
+output "sender_public_ip" {
+  value = aws_instance.forum_sender.public_ip
 }
