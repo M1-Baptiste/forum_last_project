@@ -3,16 +3,19 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Crée une nouvelle clé SSH privée avec l'algorithme RSA
 resource "tls_private_key" "key" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
+# Crée une ressource AWS Key Pair en utilisant la clé publique de la ressource tls_private_key
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
   public_key = tls_private_key.key.public_key_openssh
 }
 
+# Crée un fichier local pour stocker la clé privée
 resource "local_file" "private_key" {
   content         = tls_private_key.key.private_key_pem
   filename        = "${path.module}/deployer-key.pem"
@@ -83,7 +86,7 @@ resource "aws_instance" "forum_api" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name        = aws_key_pair.deployer.key_name
+  key_name      = aws_key_pair.deployer.key_name
 
   user_data = <<-EOT
     #!/bin/bash
@@ -108,8 +111,7 @@ resource "aws_instance" "forum_db" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name        = aws_key_pair.deployer.key_name
-
+  key_name      = aws_key_pair.deployer.key_name
 
   user_data = <<-EOT
     #!/bin/bash
@@ -128,8 +130,7 @@ resource "aws_instance" "forum_thread" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name        = aws_key_pair.deployer.key_name
-
+  key_name      = aws_key_pair.deployer.key_name
 
   user_data = <<-EOT
     #!/bin/bash
@@ -154,7 +155,7 @@ resource "aws_instance" "forum_sender" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   security_groups = [aws_security_group.forum_sg.name]
-  key_name        = aws_key_pair.deployer.key_name
+  key_name      = aws_key_pair.deployer.key_name
 
   user_data = <<-EOT
     #!/bin/bash
