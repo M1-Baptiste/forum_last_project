@@ -157,24 +157,24 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-    destroy:
-      name: Destroy Infrastructure
-      needs: deploy
-      # The destroy job will only run if the 'destroy' input is set to true when the workflow is manually triggered.
-      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.destroy == 'true' }}
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v3
+  destroy:
+    name: Destroy Infrastructure
+    needs: deploy
+    # The destroy job will only run if the 'destroy' input is set to true when the workflow is manually triggered.
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.destroy == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-        - name: Setup Terraform
-          uses: hashicorp/setup-terraform@v2
-          with:
-            terraform_version: 1.0.0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
 
-        - name: Terraform Destroy
-          run: terraform destroy -auto-approve
-          working-directory: terraform
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
