@@ -59,7 +59,6 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "forum_app" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
-  key_name      = var.aws_key_pair
   vpc_security_group_ids = [aws_security_group.forum_sg.id]
 
   # Script de démarrage pour l'installation de Docker et le déploiement
