@@ -11,12 +11,8 @@ resource "tls_private_key" "key" {
 
 # Crée une ressource AWS Key Pair en utilisant la clé publique de la ressource tls_private_key
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key-${random_pet.suffix.id}"
+  key_name   = "deployer-key"
   public_key = tls_private_key.key.public_key_openssh
-}
-
-resource "random_pet" "suffix" {
-  length = 2
 }
 
 # Crée un fichier local pour stocker la clé privée
