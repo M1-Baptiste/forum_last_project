@@ -8,6 +8,11 @@ variable "instance_type" {
   default = "t2.nano"
 }
 
+variable "aws_key_pair" {
+  type    = string
+  default = "baptiste-key"
+}
+
 variable "github_repository" {
   type    = string
   description = "Le nom de votre dépôt GitHub (ex: votre-utilisateur/votre-repo)"
