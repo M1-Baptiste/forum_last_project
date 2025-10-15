@@ -79,7 +79,7 @@ resource "aws_instance" "forum_api" {
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
     sudo usermod -aG docker ubuntu
     docker pull ghcr.io/${var.github_repository}/api:${var.app_version}
-    docker run -d --name forum-api -p 3000:3000 ghcr.io/${var.github_repository}/api:${var.app_version}
+    docker run -d --name forum-api -p 8080:3000 ghcr.io/${var.github_repository}/api:${var.app_version}
   EOT
 
   tags = {
