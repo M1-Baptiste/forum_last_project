@@ -76,21 +76,31 @@ resource "aws_instance" "forum_app" {
     # Création du fichier docker-compose
     cat << EOF > /home/ubuntu/docker-compose.yml
 version: '3.8'
+
 services:
+  # Service 1: API - Gestion des messages du forum
   api:
     image: ghcr.io/${var.github_repository}/api:${var.app_version}
     container_name: forum-api
     restart: always
     depends_on:
       - db
+    networks:
+      - backend
     environment:
       - DATABASE_URL=mongodb://db:27017/forum
+
+  # Service 2: Base de données MongoDB
   db:
     image: mongo:latest
     container_name: forum-db
     restart: always
+    networks:
+      - backend
     volumes:
-      - /data/db
+      - db-data:/data/db
+
+  # Service 3: Thread - Affichage des messages (port 80)
   thread:
     image: ghcr.io/${var.github_repository}/thread:${var.app_version}
     container_name: forum-thread
@@ -99,6 +109,10 @@ services:
       - "81:80"
     depends_on:
       - api
+    networks:
+      - frontend
+
+  # Service 4: Sender - Écriture des messages (port 8090)
   sender:
     image: ghcr.io/${var.github_repository}/sender:${var.app_version}
     container_name: forum-sender
@@ -107,6 +121,18 @@ services:
       - "8090:8080"
     depends_on:
       - api
+    networks:
+      - frontend
+
+networks:
+  backend:
+    internal: true
+  frontend:
+    driver: bridge
+
+volumes:
+  db-data:
+  api-data:
 EOF
 
     # Lancement des services
@@ -123,5 +149,4 @@ EOF
 # Stockage de l'adresse IP publique de l'instance
 resource "aws_eip" "forum_ip" {
   instance = aws_instance.forum_app.id
-  vpc      = true
 }

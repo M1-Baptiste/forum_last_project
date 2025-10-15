@@ -1,16 +1,16 @@
 variable "aws_region" {
   type    = string
-  default = "eu-west-3"
+  default = "eu-central-1"
 }
 
 variable "instance_type" {
   type    = string
-  default = "t2.micro"
+  default = "t2.nano"
 }
 
 variable "aws_key_pair" {
   type    = string
-  default = "my-key-pair"
+  default = "wNgF0hClJNdkVD7rIvPZApxviudIt/0tZZvQ4tjB"
 }
 
 variable "github_repository" {
