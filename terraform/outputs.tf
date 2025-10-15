@@ -16,5 +16,5 @@ output "sender_public_ip" {
 
 output "ssh_command" {
   description = "SSH command to connect to the API instance"
-  value       = "ssh -i deployer-key.pem ubuntu@${aws_instance.forum_api.public_ip}"
+  value       = "ssh -i baptiste-forum-key.pem ubuntu@${aws_instance.forum_api.public_ip}"
 }
