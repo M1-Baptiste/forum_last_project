@@ -5,7 +5,7 @@ provider "aws" {
 
 # Création d'un groupe de sécurité pour autoriser le trafic entrant
 resource "aws_security_group" "forum_sg" {
-  name        = "forum-security-group"
+  name_prefix = "forum-security-group-baptiste"
   description = "Allow inbound traffic for the forum services"
 
   # Règle pour le port SSH (22)
