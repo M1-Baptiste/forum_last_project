@@ -87,7 +87,7 @@ jobs:
         with:
           images: ghcr.io/${{ steps.prep.outputs.repo_lower }}/${{ matrix.service }}
           tags: |
-            type=sha,format=short
+            type=sha,format=short,prefix=sha-
             type=ref,event=branch
             type=ref,event=tag
             type=raw,value=latest,enable={{is_default_branch}}
@@ -150,9 +150,9 @@ jobs:
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | tr '_' '-')
           SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           echo "repo_lower=${REPO_LOWER}" >> $GITHUB_OUTPUT
-          echo "sha_short=${SHA_SHORT}" >> $GITHUB_OUTPUT
+          echo "sha_short=sha-${SHA_SHORT}" >> $GITHUB_OUTPUT
           echo "Repository: ${REPO_LOWER}"
-          echo "Version: ${SHA_SHORT}"
+          echo "Version: sha-${SHA_SHORT}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
