@@ -193,6 +193,7 @@ resource "aws_instance" "api" {
       --restart always \
       -p 3000:3000 \
       -e DB_HOST=${aws_instance.db.private_ip} \
+      -e DATABASE_URL=mongodb://${aws_instance.db.private_ip}:27017/forum \
       ghcr.io/${var.github_repository}/api:${var.app_version}
   EOT
 
@@ -227,6 +228,7 @@ resource "aws_instance" "thread" {
       --restart always \
       -p 80:80 \
       -e API_URL=http://${aws_instance.api.public_ip}:3000 \
+      -e SENDER_URL=http://${aws_instance.sender.public_ip} \
       ghcr.io/${var.github_repository}/thread:${var.app_version}
   EOT
 
@@ -259,7 +261,7 @@ resource "aws_instance" "sender" {
     sudo docker run -d \
       --name forum-sender \
       --restart always \
-      -p 80:80 \
+      -p 80:8080 \
       -e API_URL=http://${aws_instance.api.public_ip}:3000 \
       ghcr.io/${var.github_repository}/sender:${var.app_version}
   EOT

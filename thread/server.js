@@ -6,6 +6,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 80;
 const API_URL = process.env.API_URL || 'http://api:3000';
+const SENDER_URL = process.env.SENDER_URL || 'http://localhost:8090';
 
 // Configuration du moteur de template
 app.set('view engine', 'ejs');
@@ -25,7 +26,10 @@ app.get('/', async (req, res) => {
     }
     
     const response = await axios.get(`${API_URL}/api/messages`);
-    res.render('index', { messages: response.data });
+    res.render('index', {
+      messages: response.data,
+      senderUrl: SENDER_URL
+    });
   } catch (error) {
     console.error('Erreur lors de la récupération des messages:', error.message);
     res.render('index', { 
