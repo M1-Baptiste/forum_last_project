@@ -14,8 +14,8 @@ variable "aws_key_pair" {
 }
 
 variable "github_repository" {
-  type    = string
-  description = "Le nom de votre dépôt GitHub (ex: votre-utilisateur/votre-repo)"
+  description = "GitHub repository in format owner/repo"
+  type        = string
 }
 
 variable "app_version" {
