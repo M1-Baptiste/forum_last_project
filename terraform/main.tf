@@ -193,7 +193,7 @@ resource "aws_instance" "api" {
       --restart always \
       -p 3000:3000 \
       -e DB_HOST=${aws_instance.db.private_ip} \
-      ghcr.io/${var.github_repository}/api:${var.app_version}
+      ghcr.io/${lower(var.github_repository)}/api:${var.app_version}
   EOT
 
   depends_on = [aws_instance.db]
@@ -227,7 +227,7 @@ resource "aws_instance" "thread" {
       --restart always \
       -p 80:80 \
       -e API_URL=http://${aws_instance.api.public_ip}:3000 \
-      ghcr.io/${var.github_repository}/thread:${var.app_version}
+      ghcr.io/${lower(var.github_repository)}/api:${var.app_version}
   EOT
 
   depends_on = [aws_instance.api]
@@ -261,7 +261,7 @@ resource "aws_instance" "sender" {
       --restart always \
       -p 80:80 \
       -e API_URL=http://${aws_instance.api.public_ip}:3000 \
-      ghcr.io/${var.github_repository}/sender:${var.app_version}
+      ghcr.io/${lower(var.github_repository)}/api:${var.app_version}
   EOT
 
   depends_on = [aws_instance.api]
