@@ -66,7 +66,7 @@ jobs:
       - name: Run TruffleHog
         uses: trufflesecurity/trufflehog@main
         with:
-          path: file://.
+          extra_args: git file://.
 
   sast-scan:
     name: SAST Analysis (CodeQL)
