@@ -64,7 +64,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run TruffleHog
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.81.9
         with:
           extra_args: --git-path .
 
