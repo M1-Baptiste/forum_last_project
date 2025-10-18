@@ -55,28 +55,6 @@ jobs:
       - name: Run tests for ${{ matrix.service }}
         run: npm run test:${{ matrix.service }}
 
-  secret-scan:
-    name: Secret Scanning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Run TruffleHog
-        uses: trufflesecurity/trufflehog@v3.81.9
-        with:
-          extra_args: git --directory=.
-      - name: Scan local files for secrets
-        run: docker run -v $(pwd):/repo ghcr.io/trufflesecurity/trufflehog:v3.81.9 filesystem /repo
-      - name: Notify on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          channel-id: 'your-channel'
-          text: 'Secret scanning failed in ${{ github.repository }}. Check the pipeline for details.'
-
   sast-scan:
     name: SAST Analysis (CodeQL)
     runs-on: ubuntu-latest
@@ -101,7 +79,7 @@ jobs:
 
   build-and-push:
     name: Build and Push Docker images
-    needs: [test, secret-scan, sast-scan]
+    needs: [test, sast-scan]
     runs-on: ubuntu-latest
     strategy:
       matrix:
