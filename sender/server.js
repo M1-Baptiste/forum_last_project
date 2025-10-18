@@ -6,6 +6,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 8080;
 const API_URL = process.env.API_URL || 'http://api:3000';
+const THREAD_URL = process.env.THREAD_URL || 'http://localhost:81';
 
 // Configuration du moteur de template
 app.set('view engine', 'ejs');
@@ -22,7 +23,8 @@ app.get('/', (req, res) => {
     success: null,
     error: null,
     username: '',
-    content: ''
+    content: '',
+    threadUrl: THREAD_URL
   });
 });
 
@@ -35,7 +37,8 @@ app.post('/send', async (req, res) => {
       error: 'Le pseudonyme et le contenu sont requis',
       success: null,
       username,
-      content
+      content,
+      threadUrl: THREAD_URL
     });
   }
   
@@ -55,7 +58,8 @@ app.post('/send', async (req, res) => {
       success: 'Message envoyé avec succès',
       error: null,
       username: '',
-      content: ''
+      content: '',
+      threadUrl: THREAD_URL
     });
   } catch (error) {
     console.error('Erreur lors de l\'envoi du message:', error.message);
@@ -63,7 +67,8 @@ app.post('/send', async (req, res) => {
       error: 'Impossible d\'envoyer le message. Veuillez réessayer plus tard.',
       success: null,
       username,
-      content
+      content,
+      threadUrl: THREAD_URL
     });
   }
 });
