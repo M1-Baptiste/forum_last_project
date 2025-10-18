@@ -67,6 +67,15 @@ jobs:
         uses: trufflesecurity/trufflehog@v3.81.9
         with:
           extra_args: git --directory=.
+      - name: Scan local files for secrets
+        run: docker run -v $(pwd):/repo ghcr.io/trufflesecurity/trufflehog:v3.81.9 filesystem /repo
+      - name: Notify on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: 'your-channel'
+          text: 'Secret scanning failed in ${{ github.repository }}. Check the pipeline for details.'
 
   sast-scan:
     name: SAST Analysis (CodeQL)
